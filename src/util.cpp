@@ -33,52 +33,53 @@ void handleEVPError()
 // calculate SHA-256 hash of a file using OpenSSL EVP interface
 std::string calculateSHA256(const std::string &filePath)
 {
-    std::ifstream file(filePath, std::ifstream::binary);
-    if (!file.is_open()) {
+	std::ifstream file(filePath, std::ifstream::binary);
+	if (!file.is_open()) {
 		if (errno != ENOENT) /* OK to ignore "file not found" error: probably recursive_directory_iterator 
-								finding temporary file that is deleted by the time we get here */
+							finding temporary file that is deleted by the time we get here */
 			std::cerr << "Read error: " << filePath << ": " << strerror(errno) << "\n";
-        return "";
+		return "";
 	}
 
-    EVP_MD_CTX *mdctx = EVP_MD_CTX_new();
-    if (mdctx == nullptr) {
+	EVP_MD_CTX *mdctx = EVP_MD_CTX_new();
+	if (mdctx == nullptr) {
 		handleEVPError();
-        return "";
+		return "";
 	}
 
-    const EVP_MD *md = EVP_sha256();
+	const EVP_MD *md = EVP_sha256();
 
-    if (EVP_DigestInit_ex(mdctx, md, nullptr) != 1) {
+	if (EVP_DigestInit_ex(mdctx, md, nullptr) != 1) {
 		handleEVPError();
-        EVP_MD_CTX_free(mdctx);
-        return "";
-    }
+		EVP_MD_CTX_free(mdctx);
+		return "";
+	}
 
 	char buffer[4096];
-    while (file.read(buffer, sizeof(buffer)) || file.gcount() > 0) {
+	while (file.read(buffer, sizeof(buffer)) || file.gcount() > 0) {
 		if (EVP_DigestUpdate(mdctx, buffer, file.gcount()) != 1) {
 			handleEVPError();
 			EVP_MD_CTX_free(mdctx);
 			return "";
 		}
 	}
-    unsigned char hash[EVP_MAX_MD_SIZE];
-    unsigned hashLen = 0;
-    if (EVP_DigestFinal_ex(mdctx, hash, &hashLen) != 1) {
+	unsigned char hash[EVP_MAX_MD_SIZE];
+	unsigned hashLen = 0;
+	if (EVP_DigestFinal_ex(mdctx, hash, &hashLen) != 1) {
 		handleEVPError();
-        EVP_MD_CTX_free(mdctx);
-        return "";
-    }
+		EVP_MD_CTX_free(mdctx);
+		return "";
+	}
 
-    EVP_MD_CTX_free(mdctx);
+	EVP_MD_CTX_free(mdctx);
 
-    std::string hashStr;
-    for (unsigned i = 0; i < hashLen; ++i) {
-        char buf[4];
-        snprintf(buf, sizeof(buf), "%02x", hash[i]);
-        hashStr += buf;
-    }
+	std::string hashStr;
+	for (unsigned i = 0; i < hashLen; ++i) {
+		char buf[4];
+		snprintf(buf, sizeof(buf), "%02x", hash[i]);
+		hashStr += buf;
+	}
 
-    return hashStr;
+	return hashStr;
 }
+

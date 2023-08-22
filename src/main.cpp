@@ -7,7 +7,6 @@
 #include <filesystem>
 #include <chrono>
 #include <stdlib.h>
-#include <errno.h>
 #include <string.h>
 #include <openssl/evp.h>
 #include <openssl/err.h>
@@ -51,16 +50,16 @@ int main(int argc, char **argv)
 {
 	int idxDirPath = 1;
 	bool includeHidden = false, 
-			deleteDups = false,
-			includeZeroSize = false,
-			dupOnlyIfInSameDir = false,
-			quiet = false,
-			time = false;
+				deleteDups = false,
+				includeZeroSize = false,
+				dupOnlyIfInSameDir = false,
+				quiet = false,
+				time = false;
 
-    if (argc < 2) {
+	if (argc < 2) {
 		help(argv[0]);
-        return 1;
-    }
+		return 1;
+	}
 
 	if (argv[1][0] == '-') {
 		idxDirPath = 2;
@@ -87,23 +86,23 @@ int main(int argc, char **argv)
 		}
 	}
 
-    fs::path dirPath(argv[idxDirPath]);
-    if (!fs::exists(dirPath) || !fs::is_directory(dirPath)) {
-        std::cerr << "Invalid directory path: " << dirPath << "\n";
-        return 1;
-    }
+	fs::path dirPath(argv[idxDirPath]);
+	if (!fs::exists(dirPath) || !fs::is_directory(dirPath)) {
+		std::cerr << "Invalid directory path: " << dirPath << "\n";
+		return 1;
+	}
 
 	uintmax_t wasted;
 
 	auto start = std::chrono::high_resolution_clock::now();
-    DupsTable dt = finddup(dirPath, &wasted, includeHidden, includeZeroSize, dupOnlyIfInSameDir);
+	DupsTable dt = finddup(dirPath, &wasted, includeHidden, includeZeroSize, dupOnlyIfInSameDir);
 	auto stop = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start); // microseconds
+	auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start); // microseconds
 
 	if (!quiet)
 		displayDups(dirPath, dt, wasted);
 	if (time)
-    	std::cerr << "Search completed in " << duration.count() / 1000. << " ms." << std::endl;
+		std::cerr << "Search completed in " << duration.count() / 1000. << " ms." << std::endl;
 
 	if (deleteDups) {
 		std::string resp;
@@ -116,6 +115,6 @@ int main(int argc, char **argv)
 			std::cerr << "Deletion aborted\n";
 	}
 
-    return 0;
+	return 0;
 }
 
