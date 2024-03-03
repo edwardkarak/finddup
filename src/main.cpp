@@ -95,18 +95,24 @@ int main(int argc, char **argv)
 	uintmax_t wasted;
 
 	auto start = std::chrono::high_resolution_clock::now();
-	DupsTable dt = finddup(dirPath, &wasted, includeHidden, includeZeroSize, dupOnlyIfInSameDir);
+	DupsTable dt;
+	try {
+		dt = finddup(dirPath, &wasted, includeHidden, includeZeroSize, dupOnlyIfInSameDir);
+	} catch (fs::filesystem_error &fse) {
+		std::cerr << "Exception caught at " << __FILE__ << ", " << __LINE__ << ": " << fse.what() << "\n";
+		return 1;
+	}
 	auto stop = std::chrono::high_resolution_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start); // microseconds
 
 	if (!quiet)
 		displayDups(dirPath, dt, wasted);
 	if (time)
-		std::cerr << "Search completed in " << duration.count() / 1000. << " ms." << std::endl;
+		std::cerr << "Search completed in " << round(duration.count() * 1e-6) << " s." << std::endl;
 
 	if (deleteDups) {
 		std::string resp;
-		std::cerr << "Are you sure you want to delete " << fmtsize(wasted) << " (y/n)? ";
+		std::cerr << "Do you want to delete " << fmtsize(wasted) << " (y/n)? You will be prompted for each group. ";
 		std::getline(std::cin, resp);
 		if (resp == "Y" || resp == "y") {
 			rmDups(dt);

@@ -15,7 +15,18 @@ DupsTable finddup(const fs::path &dirPath, uintmax_t *dupSizeTotal, bool include
 	for (const auto &entry: fs::recursive_directory_iterator(dirPath, fs::directory_options::skip_permission_denied)) {
 		if (!includeHidden && entry.path().filename().string()[0] == '.')
 			continue;
-		if (fs::is_regular_file(entry.status())) {
+
+		bool isregfile;
+		try {
+			isregfile = fs::is_regular_file(entry.status());
+		} catch (fs::filesystem_error &fse) {
+			if (errno != ELOOP) { // if ELOOP ("too many symlinks") we can ignore
+				std::cerr << __FILE__ << ", " << __LINE__ << ": " << fse.what() << "\n";
+				perror("");
+				exit(EXIT_FAILURE);
+			}
+		}
+		if (isregfile) {
 			uintmax_t fileSize = fs::file_size(entry);
 			if (!includeZeroSize && fileSize == 0)
 				continue;
@@ -61,7 +72,7 @@ void rmDups(const DupsTable &dupFiles)
 	for (auto &[size, pathlist]: dupFiles) {
 		for (size_t i = 1; i < pathlist.size(); ++i)
 			std::cerr << pathlist[i] << "\n";
-		std::cerr << "Delete these files (y/n)? ";
+		std::cerr << "Delete " << (pathlist.size() > 2 ? "these files" : "this file") << " (y/n)? Size: " << fmtsize(size * (pathlist.size()-1)) << "\n";
 		std::string resp;
 		std::getline(std::cin, resp);
 		if (resp == "Y" || resp == "y") {

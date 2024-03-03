@@ -37,7 +37,7 @@ std::string calculateSHA256(const std::string &filePath)
 	if (!file.is_open()) {
 		if (errno != ENOENT) /* OK to ignore "file not found" error: probably recursive_directory_iterator 
 							finding temporary file that is deleted by the time we get here */
-			std::cerr << "Read error: " << filePath << ": " << strerror(errno) << "\n";
+			std::cerr << "Read error: " << filePath << ": " << strerror(errno) << "--continuing as normal...\n";
 		return "";
 	}
 
