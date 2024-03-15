@@ -21,7 +21,7 @@ DupsTable finddup(const fs::path &dirPath, uintmax_t *dupSizeTotal, bool include
 			isregfile = fs::is_regular_file(entry.status());
 		} catch (fs::filesystem_error &fse) {
 			if (errno != ELOOP) { // if ELOOP ("too many symlinks") we can ignore
-				std::cerr << __FILE__ << ", " << __LINE__ << ": " << fse.what() << "\n";
+				std::cerr << "filesystem_error exception caught at " << __FILE__ << ", " << __LINE__ << ": " << fse.what() << "\n";
 				perror("");
 				exit(EXIT_FAILURE);
 			}
@@ -75,6 +75,7 @@ void rmDups(const DupsTable &dupFiles)
 		std::cerr << "Delete " << (pathlist.size() > 2 ? "these files" : "this file") << " (y/n)? Size: " << fmtsize(size * (pathlist.size()-1)) << "\n";
 		std::string resp;
 		std::getline(std::cin, resp);
+		std::cerr << "\n";
 		if (resp == "Y" || resp == "y") {
 			for (size_t i = 1; i < pathlist.size(); ++i)
 				fs::remove(pathlist[i]);

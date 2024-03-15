@@ -10,16 +10,24 @@
 #include <openssl/evp.h>
 #include <openssl/err.h>
 
+std::string fmtstr(double x, double prec=2)
+{
+	if (floor(x) == x)
+		prec = 0;
+	std::string s = std::to_string(x);
+	return s.substr(0, s.find(".") + prec + 1);
+}
+
 std::string fmtsize(uintmax_t sizeBytes)
 {
 	if (1024 > sizeBytes)
-		return std::to_string(sizeBytes) + " B";
+		return fmtstr(sizeBytes) + " B";
 	if (1024*1024 > sizeBytes)
-		return std::to_string((double) sizeBytes / 1024.) + " KiB";
+		return fmtstr((double) sizeBytes / 1024.) + " KiB";
 	if (1024*1024*1024 > sizeBytes)
-		return std::to_string((double) sizeBytes / (1024.*1024.)) + " MiB";
+		return fmtstr((double) sizeBytes / (1024.*1024.)) + " MiB";
 
-	return std::to_string((double) sizeBytes / (1024.*1024.*1024.)) + " GiB";
+	return fmtstr((double) sizeBytes / (1024.*1024.*1024.)) + " GiB";
 }
 
 void handleEVPError()

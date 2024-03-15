@@ -14,6 +14,8 @@
 #include "util.h"
 #include "finddup.h"
 
+/* TODO: histogram of filesize frequencies */
+
 namespace fs = std::filesystem;
 
 void displayDups(const fs::path &dirPath, const DupsTable &dupFiles, uintmax_t dupSizeTotal)
@@ -27,7 +29,7 @@ void displayDups(const fs::path &dirPath, const DupsTable &dupFiles, uintmax_t d
 		}
 	}
 	if (anyDupsFound)
-		std::cout << "Duplicate files found wasting " << fmtsize(dupSizeTotal) << "\n";
+		std::cout << "\n=====================================================\nDuplicate files found wasting " << fmtsize(dupSizeTotal) << "\n";
 	else
 		std::cout << "No duplicate files found in " << dirPath << "\n";
 }
@@ -94,12 +96,13 @@ int main(int argc, char **argv)
 
 	uintmax_t wasted;
 
+	std::cerr << "Searching...\n";
 	auto start = std::chrono::high_resolution_clock::now();
 	DupsTable dt;
 	try {
 		dt = finddup(dirPath, &wasted, includeHidden, includeZeroSize, dupOnlyIfInSameDir);
 	} catch (fs::filesystem_error &fse) {
-		std::cerr << "Exception caught at " << __FILE__ << ", " << __LINE__ << ": " << fse.what() << "\n";
+		std::cerr << "filesystem_error exception caught at " << __FILE__ << ", " << __LINE__ << ": " << fse.what() << "\n";
 		return 1;
 	}
 	auto stop = std::chrono::high_resolution_clock::now();
@@ -108,15 +111,16 @@ int main(int argc, char **argv)
 	if (!quiet)
 		displayDups(dirPath, dt, wasted);
 	if (time)
-		std::cerr << "Search completed in " << round(duration.count() * 1e-6) << " s." << std::endl;
+		std::cerr << "Search completed in " << round(duration.count() * 1e-6) << " s.\n";
 
-	if (deleteDups) {
+	if (deleteDups && wasted > 0) {
 		std::string resp;
 		std::cerr << "Do you want to delete " << fmtsize(wasted) << " (y/n)? You will be prompted for each group. ";
 		std::getline(std::cin, resp);
+		std::cerr << "\n";
 		if (resp == "Y" || resp == "y") {
 			rmDups(dt);
-			std::cerr << "Freed " << fmtsize(wasted) << "\n";
+			std::cerr << "Freed " << fmtsize(wasted) << "\n"; // TODO: may have freed < wasted bytes if we didnt agree to delete everything
 		} else
 			std::cerr << "Deletion aborted\n";
 	}
