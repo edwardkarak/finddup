@@ -8,6 +8,14 @@
 
 #include "util.h"
 
+// TODO: filter by extension
+bool endsWith(const std::string &str, const std::string &suffix)
+{
+    if (str.length() < suffix.length())
+        return false;
+    return str.compare(str.length() - suffix.length(), suffix.length(), suffix) == 0;
+}
+
 DupsTable finddup(const fs::path &dirPath, uintmax_t *dupSizeTotal, bool includeHidden, bool includeZeroSize, bool dupOnlyIfInSameDir)
 {
 	std::vector<std::pair<uintmax_t, fs::path>> fileEntries;
