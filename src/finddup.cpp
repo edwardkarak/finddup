@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <math.h>
 
 #include "util.h"
 
@@ -89,5 +90,14 @@ void rmDups(const DupsTable &dupFiles)
 				fs::remove(pathlist[i]);
 		}
 	}
+}
+
+int longestPath(const DupsTable &dt)
+{
+	int longest = 0;
+	for (auto &[size, pathlist]: dt)
+		for (auto &path: pathlist)
+			longest = fmax(longest, (int) path.string().size());
+	return longest;
 }
 

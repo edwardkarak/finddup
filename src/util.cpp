@@ -2,10 +2,10 @@
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <string>
 #include <vector>
 #include <unordered_map>
-#include <algorithm>
 
 #include <openssl/evp.h>
 #include <openssl/err.h>
@@ -15,7 +15,7 @@ std::string fmtstr(double x, double prec=2)
 	if (floor(x) == x)
 		prec = 0;
 	std::string s = std::to_string(x);
-	return s.substr(0, s.find(".") + prec + 1);
+	return s.substr(0, s.find(".") + prec);
 }
 
 std::string fmtsize(uintmax_t sizeBytes)
@@ -89,5 +89,22 @@ std::string calculateSHA256(const std::string &filePath)
 	}
 
 	return hashStr;
+}
+
+/* from https://stackoverflow.com/a/58237530 */
+template <typename TP> std::time_t to_time_t(TP tp)
+{
+	using namespace std::chrono;
+	auto sctp = time_point_cast<system_clock::duration>(tp - TP::clock::now() + system_clock::now());
+	return system_clock::to_time_t(sctp);
+}
+
+std::string getLastWriteTimeStr(const std::filesystem::path &p)
+{
+	time_t tt = to_time_t(std::filesystem::last_write_time(p));
+	tm *tm = localtime(&tt);
+	std::stringstream buffer;
+	buffer << std::put_time(tm, "%F %X");
+	return buffer.str();
 }
 

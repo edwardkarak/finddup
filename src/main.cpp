@@ -3,11 +3,8 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
-#include <algorithm>
 #include <filesystem>
 #include <chrono>
-#include <stdlib.h>
-#include <string.h>
 #include <openssl/evp.h>
 #include <openssl/err.h>
 
@@ -21,10 +18,11 @@ namespace fs = std::filesystem;
 void displayDups(const fs::path &dirPath, const DupsTable &dupFiles, uintmax_t dupSizeTotal)
 {
 	bool anyDupsFound = false;
+	int longestPathWidth = longestPath(dupFiles) + 2;
 	for (auto &[size, pathlist]: dupFiles) {
 		std::cout << "Identical files, size " << fmtsize(size) << ":\n";
 		for (auto &path: pathlist) {
-			std::cout << "  " << path << "\n";
+			std::cout << "  " << std::left << std::setw(longestPathWidth) << path << std::setw(0) << "\t" << getLastWriteTimeStr(path) << "\n";
 			anyDupsFound = true;
 		}
 	}
@@ -33,7 +31,7 @@ void displayDups(const fs::path &dirPath, const DupsTable &dupFiles, uintmax_t d
 	else
 		std::cout << "No duplicate files found in " << dirPath << "\n";
 }
-//TODO: ask which file want to keep (show date modified for each candidate)
+//TODO: ask which file want to keep
 void help(const std::string &progname)
 {
 	std::cerr << "Usage: " << progname << " [-0adhqs] <directory_path>\n";
