@@ -1,1 +1,3 @@
 Compile by running `make`. The executable ouput is called `finddup`.
+
+Compile-time constants: MAX_WIDTH (in src/main.cpp): Maximum width of the name column, in characters. Adjust as needed to fit your terminal width.

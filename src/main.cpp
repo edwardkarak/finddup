@@ -15,10 +15,12 @@
 
 namespace fs = std::filesystem;
 
+constexpr int MAX_WIDTH = 168;
+
 void displayDups(const fs::path &dirPath, const DupsTable &dupFiles, uintmax_t dupSizeTotal)
 {
 	bool anyDupsFound = false;
-	int longestPathWidth = longestPath(dupFiles) + 2;
+	int longestPathWidth = fmin(longestPath(dupFiles) + 2, MAX_WIDTH);
 	for (auto &[size, pathlist]: dupFiles) {
 		std::cout << "Identical files, size " << fmtsize(size) << ":\n";
 		for (auto &path: pathlist) {
