@@ -33,7 +33,7 @@ void displayDups(const fs::path &dirPath, const DupsTable &dupFiles, uintmax_t d
 	else
 		std::cout << "No duplicate files found in " << dirPath << "\n";
 }
-//TODO: ask which file want to keep
+// TODO: ask which file want to keep
 void help(const std::string &progname)
 {
 	std::cerr << "Usage: " << progname << " [-0adhqs] <directory_path>\n";
@@ -114,8 +114,8 @@ int main(int argc, char **argv)
 		std::getline(std::cin, resp);
 		std::cerr << "\n";
 		if (resp == "Y" || resp == "y") {
-			rmDups(dt);
-			std::cerr << "Freed " << fmtsize(wasted) << "\n"; // TODO: may have freed < wasted bytes if we didnt agree to delete everything
+			uintmax_t nbyDeleted = rmDups(dt);
+			std::cerr << "Freed " << fmtsize(nbyDeleted) << "\n";
 		} else
 			std::cerr << "Deletion aborted\n";
 	}

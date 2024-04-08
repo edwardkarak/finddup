@@ -76,8 +76,9 @@ DupsTable finddup(const fs::path &dirPath, uintmax_t *dupSizeTotal, bool include
 	return dupFiles;
 }
 
-void rmDups(const DupsTable &dupFiles)
+uintmax_t rmDups(const DupsTable &dupFiles)
 {
+	uintmax_t nbyDeleted = 0;
 	for (auto &[size, pathlist]: dupFiles) {
 		for (size_t i = 1; i < pathlist.size(); ++i)
 			std::cerr << pathlist[i] << "\n";
@@ -86,10 +87,13 @@ void rmDups(const DupsTable &dupFiles)
 		std::getline(std::cin, resp);
 		std::cerr << "\n";
 		if (resp == "Y" || resp == "y") {
-			for (size_t i = 1; i < pathlist.size(); ++i)
+			for (size_t i = 1; i < pathlist.size(); ++i) {
 				fs::remove(pathlist[i]);
+				nbyDeleted += size;
+			}
 		}
 	}
+	return nbyDeleted;
 }
 
 int longestPath(const DupsTable &dt)
