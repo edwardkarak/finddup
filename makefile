@@ -1,6 +1,7 @@
 CXX = g++
 CXXFLAGS = -std=c++17 -Wall -Wextra
-LDFLAGS = -lssl -lcrypto
+LDFLAGS = $(shell pkg-config --libs openssl)
+INCLUDEFLAGS = $(shell pkg-config --cflags openssl)
 OUTPUT = finddup
 SOURCES = src/main.cpp src/util.cpp src/finddup.cpp
 BUILD_DIR = build
@@ -15,15 +16,14 @@ all: $(OUTPUT)
 
 # Link object files to create the output
 $(OUTPUT): $(OBJECTS)
-	$(CXX) $(CXXFLAGS) $(OBJECTS) -o $(OUTPUT) $(LDFLAGS)
+	$(CXX) $(CXXFLAGS) $(INCLUDEFLAGS) $(OBJECTS) -o $(OUTPUT) $(LDFLAGS)
 
 # Compile each source file into an object file
 $(BUILD_DIR)/%.o: src/%.cpp
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) $(INCLUDEFLAGS) -c $< -o $@
 
 # Clean up object files and output
 clean:
 	rm -f $(OUTPUT) $(BUILD_DIR)/*.o
 
 .PHONY: all clean
-
